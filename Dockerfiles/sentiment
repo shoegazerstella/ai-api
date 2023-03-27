@@ -1,0 +1,26 @@
+FROM python:3.7-slim
+
+ARG AI_API_ENDPOINT_NAME
+
+ENV AI_API_ENDPOINT_NAME=$AI_API_ENDPOINT_NAME
+
+RUN /usr/local/bin/python -m pip install --upgrade pip
+
+RUN echo "installing AI API requirements"
+COPY requirements.txt /tmp/requirements_lib.txt
+RUN pip install -r /tmp/requirements_lib.txt
+
+RUN echo "installing requirements for $AI_API_ENDPOINT_NAME lib"
+COPY /workers/$AI_API_ENDPOINT_NAME/requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
+
+WORKDIR /app
+#COPY . .
+
+RUN echo "copying src code content"
+COPY /workers/$AI_API_ENDPOINT_NAME/ /app/workers/$AI_API_ENDPOINT_NAME/
+COPY /handlers/$AI_API_ENDPOINT_NAME.py /app/handlers/
+COPY /config_models/ /app/config_models/
+COPY /server/ /app/server/
+
+CMD ["bash"]
